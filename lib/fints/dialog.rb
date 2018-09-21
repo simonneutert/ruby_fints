@@ -53,6 +53,7 @@ module FinTS
       FinTS::Client.logger.debug("HKSAL max version: #{@hksalversion}")
       FinTS::Client.logger.debug("TAN mechanisms: #{@tan_mechs}")
       get_response_end
+      self
     end
 
     def init
