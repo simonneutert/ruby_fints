@@ -36,19 +36,13 @@ module FinTS
 
     def successful?
       summary = get_summary_by_segment('HIRMG')
-      summary.each do |code, msg|
-        if code[0] == '9'
-          return false
-        end
-      end
+      summary.each { |code, msg| return false if code[0] == '9' }
       return true
     end
 
     def get_dialog_id
       seg = self.find_segment('HNHBK')
-      unless seg
-        raise ArgumentError, 'Invalid response, no HNHBK segment'
-      end
+      raise ArgumentError, 'Invalid response, no HNHBK segment' unless seg
       get_segment_index(4, seg)
     end
 
@@ -88,9 +82,7 @@ module FinTS
         parts = split_for_data_groups(s)
         segheader = split_for_data_elements(parts[0])
         current_version = segheader[2].to_i
-        if current_version > ret
-          ret = current_version
-        end
+        ret = current_version if current_version > ret
       end
       ret
     end
@@ -109,7 +101,7 @@ module FinTS
       end
       return false
     end
-    
+
     def unwrap(data)
       match = RE_UNWRAP.match(data)
       match ? match[1] : data
@@ -130,7 +122,7 @@ module FinTS
       end
       found
     end
-    
+
     def find_segment_for_reference(name, ref)
       segs = find_segments(name)
       segs.each do |seg|
