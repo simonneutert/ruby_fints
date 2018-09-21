@@ -20,7 +20,7 @@ module FinTS
 
     def get_summary_by_segment(name)
       if !['HIRMS', 'HIRMG'].include?(name)
-        raise ArgumentError, 'Unsupported segment for message summary'
+        raise(ArgumentError, 'Unsupported segment for message summary')
       end
 
       seg = find_segment(name)
@@ -71,8 +71,11 @@ module FinTS
 
     def get_segment_index(idx, seg)
       seg = split_for_data_groups(seg)
-      return seg[idx - 1] if seg.length > idx - 1
-      nil
+      if seg.length > idx - 1
+        seg[idx - 1]
+      else
+        nil
+      end
     end
 
     def get_segment_max_version(name)
@@ -148,6 +151,6 @@ module FinTS
       end
       touchdown
     end
-    
+
   end
 end
