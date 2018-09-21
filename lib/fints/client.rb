@@ -134,6 +134,7 @@ module FinTS
             end
 
       segment = Segment::HKKAZ.new(3, hversion, acc, start_date, end_date, touchdown)
+      acc = FinTS::Helper.build_message(account, hversion)
       new_message(dialog, [segment])
     end
 
@@ -151,6 +152,7 @@ module FinTS
 
       # end dialog
       dialog.send_end
+      acc = FinTS::Helper.build_message(account, hversion)
 
       # find segment and split up to balance part
       seg = resp.find_segment('HIWPD')
@@ -170,13 +172,7 @@ module FinTS
     def create_get_holdings_message(dialog, account)
       hversion = dialog.hksalversion
 
-      acc = if [1, 2, 3, 4, 5, 6].include?(hversion)
-              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            elsif hversion == 7
-              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            else
-              raise ArgumentError, "Unsupported HKSAL version #{hversion}"
-            end
+      acc = FinTS::Helper.build_message(account, hversion)
 
       new_message(dialog, [Segment::HKWPD.new(3, hversion, acc)])
     end
