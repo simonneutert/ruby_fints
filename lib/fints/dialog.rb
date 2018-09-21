@@ -36,7 +36,7 @@ module FinTS
       ])
 
       FinTS::Client.logger.debug("Sending SYNC: #{msg_sync}")
-      resp = send_msg(msg_sync)
+      resp = get_response(msg_sync)
       FinTS::Client.logger.debug("Got SYNC response: #{resp}")
       @system_id = resp.get_system_id
       @dialog_id = resp.get_dialog_id
@@ -51,7 +51,7 @@ module FinTS
       FinTS::Client.logger.debug("HKKAZ max version: #{@hkkazversion}")
       FinTS::Client.logger.debug("HKSAL max version: #{@hksalversion}")
       FinTS::Client.logger.debug("TAN mechanisms: #{@tan_mechs}")
-      send_end
+      get_response_end
     end
 
     def init
@@ -64,7 +64,7 @@ module FinTS
         seg_prepare,
       ], @tan_mechs)
       FinTS::Client.logger.debug("Sending INIT: #{msg_init}")
-      resp = send_msg(msg_init)
+      resp = get_response(msg_init)
       FinTS::Client.logger.debug("Got INIT response: #{resp}")
 
       @dialog_id = resp.get_dialog_id
@@ -73,7 +73,7 @@ module FinTS
       @dialog_id
     end
 
-    def send_msg(msg)
+    def get_response(msg)
       FinTS::Client.logger.info('Sending Message')
       msg.msg_no = @msg_no
       msg.dialog_id = @dialog_id
@@ -86,14 +86,14 @@ module FinTS
       resp
     end
 
-    def send_end
+    def get_response_end
       FinTS::Client.logger.info('Initialize END')
 
       msg_end = Message.new(@blz, @username, @pin, @system_id, @dialog_id, @msg_no, [
         Segment::HKEND.new(3, @dialog_id)
       ])
       FinTS::Client.logger.debug("Sending END: #{msg_end}")
-      resp = send_msg(msg_end)
+      resp = get_response(msg_end)
       FinTS::Client.logger.debug("Got END response: #{resp}")
       FinTS::Client.logger.info('Resetting dialog ID and message number count')
       @dialog_id = 0
