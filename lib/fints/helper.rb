@@ -21,5 +21,27 @@ module FinTS
     def self.split_for_data_elements(deg)
       deg.split(/:(?<!\?:)/)
     end
+
+    def self.build_message(account, hversion)
+      if [4, 5, 6].include?(hversion)
+        [
+          account[:accountnumber],
+          account[:subaccount],
+          '280',
+          account[:blz]
+        ].join(':')
+      elsif hversion == 7
+        [
+          account[:iban],
+          account[:bic],
+          account[:accountnumber],
+          account[:subaccount],
+          '280',
+          account[:blz]
+        ].join(':')
+      else
+        raise ArgumentError, "Unsupported HKSAL version #{hversion}"
+      end
+    end
   end
 end
