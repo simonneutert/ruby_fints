@@ -68,6 +68,7 @@ module FinTS
 
     def create_balance_message(dialog, account)
       hversion = dialog.hksalversion
+      dialog = new_dialog
 
       acc = if [4, 5, 6].include?(hversion)
               [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
@@ -76,6 +77,8 @@ module FinTS
             else
               raise ArgumentError, "Unsupported HKSAL version #{hversion}"
             end
+      # end dialog
+      dialog.get_response_end
 
       segment = Segment::HKSAL.new(3, hversion, acc)
       new_message(dialog, [segment])
@@ -138,20 +141,12 @@ module FinTS
       new_message(dialog, [segment])
     end
 
-    def get_holdings(account)
-      # init dialog
-      dialog = self.new_dialog()
-      dialog.sync
-      dialog.init
-
       # execute job
       msg = create_get_holdings_message(dialog, account)
       FinTS::Client.logger.debug("Sending HKWPD: #{msg}")
       resp = dialog.send_msg(msg)
       FinTS::Client.logger.debug("Got HIWPD response: #{resp}")
 
-      # end dialog
-      dialog.send_end
       acc = FinTS::Helper.build_message(account, hversion)
 
       # find segment and split up to balance part
