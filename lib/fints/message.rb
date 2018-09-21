@@ -15,8 +15,10 @@ module FinTS
       @encrypted_segments = []
       @tan_mechs = dialog.tan_mechs
 
-      if tan_mechs && !tan_mechs.include?('999')
       set_profile_and_security
+      encode_segments(encrypted_segments)
+    end
+
     def set_profile_and_security
       if @tan_mechs && !@tan_mechs.include?('999')
         @profile_version = 2
@@ -27,20 +29,20 @@ module FinTS
       end
     end
 
+    def encode_segments(encrypted_segments)
+      # init enc_envelop
+      @enc_envelop = Segment::HNVSD.new(999, '')
+      # build heads
       sig_head = build_signature_head
       enc_head = build_encryption_head
+      # build start of segment
       @segments << enc_head
-
-      @enc_envelop = Segment::HNVSD.new(999, '')
       @segments << @enc_envelop
-
       append_enc_segment(sig_head)
-      encrypted_segments.each do |segment|
-        append_enc_segment(segment)
-      end
-
+      # build encrypted_segments of segment
+      encrypted_segments.each { |segment| append_enc_segment(segment) }
+      # build of segment
       cur_count = encrypted_segments.length + 3
-
       sig_end = Segment::HNSHA.new(cur_count, @secref, @pin)
       append_enc_segment(sig_end)
       @segments << Segment::HNHBS.new(cur_count + 1, msg_no)
