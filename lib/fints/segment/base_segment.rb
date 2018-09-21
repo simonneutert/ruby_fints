@@ -1,5 +1,6 @@
 class BaseSegment
   attr_accessor :segmentno
+  attr_reader :type, :version
 
   def initialize(segmentno, data)
     @segmentno = segmentno
@@ -9,9 +10,10 @@ class BaseSegment
   def to_s
     res = [type, @segmentno, version].join(':')
     @data.each do |d|
-      res += "+#{d}"
+      res << "+#{d}"
     end
-    res + "'"
+    res << "'"
+    res
   end
 
   protected
@@ -19,7 +21,7 @@ class BaseSegment
   def type
     raise NotImplementedError
   end
-  
+
   def version
     raise NotImplementedError
   end

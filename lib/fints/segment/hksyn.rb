@@ -8,19 +8,12 @@ module FinTS
       SYNC_MODE_SIGNATURE_ID = 2
 
       def initialize(segment_no, mode: SYNC_MODE_NEW_CUSTOMER_ID)
+        @type = 'HKSYN'
+        @version = 3
         data = [mode]
         super(segment_no, data)
       end
 
-      protected
-
-      def type
-        'HKSYN'
-      end
-      
-      def version
-        3
-      end
     end
   end
 end

@@ -6,6 +6,8 @@ module FinTS
       attr_reader :encoded_data
 
       def initialize(segno, encoded_data)
+        @type = 'HNVSD'
+        @version = 1
         @encoded_data = encoded_data
         data = ["@#{encoded_data.length}@#{encoded_data}"]
         super(segno, data)
@@ -16,15 +18,6 @@ module FinTS
         @data = ["@#{encoded_data.length}@#{encoded_data}"]
       end
 
-      protected
-
-      def type
-        'HNVSD'
-      end
-      
-      def version
-        1
-      end
     end
   end
 end

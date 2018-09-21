@@ -9,19 +9,12 @@ module FinTS
       PINTAN_VERSION = 1  # 1-step
 
       def initialize(segno, secref, pin)
+        @type = 'HNSHA'
+        @version = 2
         data = [secref, '', Helper.fints_escape(pin)]
         super(segno, data)
       end
 
-      protected
-
-      def type
-        'HNSHA'
-      end
-      
-      def version
-        2
-      end
     end
   end
 end

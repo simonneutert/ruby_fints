@@ -8,6 +8,8 @@ module FinTS
       SECURITY_SUPPLIER_ROLE = 1  # ISS
 
       def initialize(segno, secref, blz, username, system_id, profile_version, security_function=SECURITY_FUNC)
+        @type = 'HNSHK'
+        @version = 4
         data = [
           ['PIN', profile_version.to_s].join(':'),
           security_function,
@@ -24,15 +26,6 @@ module FinTS
         super(segno, data)
       end
 
-      protected
-
-      def type
-        'HNSHK'
-      end
-      
-      def version
-        4
-      end
     end
   end
 end

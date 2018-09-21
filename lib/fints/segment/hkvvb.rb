@@ -8,19 +8,16 @@ module FinTS
       LANG_FR = 3
 
       def initialize(segment_no, lang: LANG_DE)
-        data = [0, 0, lang, Helper.fints_escape(FinTS::GEM_NAME), Helper.fints_escape(FinTS::VERSION)]
+        @type = 'HKVVB'
+        @version = 3
+        data = [
+          0, 0, lang,
+          Helper.fints_escape(FinTS::GEM_NAME),
+          Helper.fints_escape(FinTS::VERSION)
+        ]
         super(segment_no, data)
       end
 
-      protected
-
-      def type
-        'HKVVB'
-      end
-      
-      def version
-        3
-      end
     end
   end
 end

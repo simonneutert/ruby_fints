@@ -2,11 +2,13 @@ module FinTS
   module Segment
     # HNVSK (Verschlüsselungskopf)
     # Section B.5.3
-    class HNVSK < BaseSegment  
+    class HNVSK < BaseSegment
       COMPRESSION_NONE = 0
       SECURITY_SUPPLIER_ROLE = 1  # ISS
 
       def initialize(segno, blz, username, system_id, profile_version)
+        @type = 'HNVSK'
+        @version = 3
         data = [
           ['PIN', profile_version.to_s].join(':'),
           998,
@@ -20,15 +22,6 @@ module FinTS
         super(segno, data)
       end
 
-      protected
-
-      def type
-        'HNVSK'
-      end
-      
-      def version
-        3
-      end
     end
   end
 end
