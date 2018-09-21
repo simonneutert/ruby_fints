@@ -1,8 +1,6 @@
 module FinTS
   class DialogError < StandardError; end
 
-  require 'ostruct'
-
   class Dialog
     attr_accessor :system_id
     attr_accessor :dialog_id
@@ -57,7 +55,6 @@ module FinTS
       FinTS::Client.logger.info('Initialize Dialog')
       seg_identification = Segment::HKIDN.new(3, @blz, @username, @system_id)
       seg_prepare = Segment::HKVVB.new(4)
-
       msg_init = new_message([seg_identification, seg_prepare])
 
       FinTS::Client.logger.debug("Sending INIT: #{msg_init}")
@@ -72,7 +69,8 @@ module FinTS
       FinTS::Client.logger.info('Sending Message')
       resp = Response.new(@connection.send_msg(msg))
       if !resp.successful?
-        raise DialogError, resp.get_summary_by_segment('HIRMG')
+        error = resp.get_summary_by_segment('HIRMG')
+        raise(DialogError, "#{error}")
       else
         @msg_no += 1
         resp
@@ -81,9 +79,7 @@ module FinTS
 
     def get_response_end
       FinTS::Client.logger.info('Initialize END')
-
       msg_end = new_message([Segment::HKEND.new(3, @dialog_id)])
-
       FinTS::Client.logger.debug("Sending END: #{msg_end}")
       resp = get_response(msg_end)
       FinTS::Client.logger.debug("Got END response: #{resp}")
