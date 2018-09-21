@@ -14,7 +14,7 @@ module FinTS
       @segments = []
       @encrypted_segments = []
       @tan_mechs = dialog.tan_mechs
-
+      # build functions
       set_profile_and_security
       encode_segments(encrypted_segments)
     end
@@ -70,5 +70,6 @@ module FinTS
     def to_s
       build_header.to_s + @segments.map(&:to_s).join('')
     end
+    
   end
 end

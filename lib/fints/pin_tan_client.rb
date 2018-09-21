@@ -1,5 +1,6 @@
 module FinTS
   class PinTanClient < Client
+
     def initialize(blz, username, pin, server)
       @blz = blz
       @username = username
@@ -8,5 +9,6 @@ module FinTS
       @system_id = 0
       super()
     end
+    
   end
 end

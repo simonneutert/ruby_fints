@@ -1,5 +1,6 @@
 module FinTS
   class HTTPSConnection
+    
     def initialize(url)
       @url = URI(url)
     end
@@ -21,5 +22,6 @@ module FinTS
         res
       end
     end
+
   end
 end
