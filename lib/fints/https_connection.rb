@@ -15,10 +15,11 @@ module FinTS
       code = response.code.to_i
       if code < 200 || code > 299
         raise ConnectionError, "Bad status code #{code}"
+      else
+        res = Base64.decode64(response.body).force_encoding('iso-8859-1').encode('utf-8')
+        FinTS::Client.logger.debug(">> #{res}")
+        res
       end
-      res = Base64.decode64(response.body).force_encoding('iso-8859-1').encode('utf-8')
-      FinTS::Client.logger.debug(">> #{res}")
-      res
     end
   end
 end
