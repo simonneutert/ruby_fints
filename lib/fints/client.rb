@@ -5,7 +5,7 @@ module FinTS
 
       def logger
         @logger ||= Logger.new($stdout).tap do |log|
-          log.progname = self.name
+          log.progname = name
         end
       end
     end
@@ -28,19 +28,19 @@ module FinTS
       accountlist = accounts.split('+').drop(1)
       @accounts = accountlist.map do |acc|
         arr = acc.split(':')
-        {
+        hsh = {
           iban: arr[1],
           bic: arr[2],
           accountnumber: arr[3],
           subaccount: arr[4],
           blz: arr[6]
         }
+        hsh
       end
     end
 
     def get_balance(account)
-      FinTS::Client.logger.info("Start fetching balance")
-
+      FinTS::Client.logger.info('Start fetching balance')
       dialog = new_dialog
 
       msg = create_balance_message(dialog, account)
@@ -66,88 +66,17 @@ module FinTS
       balance
     end
 
-    def create_balance_message(dialog, account)
-      hversion = dialog.hksalversion
+    def get_holdings(account)
       dialog = new_dialog
-
-      acc = if [4, 5, 6].include?(hversion)
-              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            elsif hversion == 7
-              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            else
-              raise ArgumentError, "Unsupported HKSAL version #{hversion}"
-            end
-      # end dialog
-      dialog.get_response_end
-
-      segment = Segment::HKSAL.new(3, hversion, acc)
-      new_message(dialog, [segment])
-    end
-
-    def get_statement(account, start_date, end_date)
-      FinTS::Client.logger.info("Start fetching from #{start_date} to #{end_date}")
-
-      dialog = new_dialog
-
-      msg = create_statement_message(dialog, account, start_date, end_date, nil)
-      FinTS::Client.logger.debug("Send message: #{msg}")
-      resp = dialog.get_response(msg)
-      touchdowns = resp.get_touchdowns(msg)
-      responses = [resp]
-      touchdown_counter = 1
-
-      while touchdowns.include?(Segment::HKKAZ)
-        FinTS::Client.logger.info("Fetching more results (#{touchdown_counter})...")
-        msg = create_statement_message(dialog, account, start_date, end_date, touchdowns[Segment::HKKAZ])
-        FinTS::Client.logger.debug("Send message: #{msg}")
-
-        resp = dialog.get_response(msg)
-        responses << resp
-        touchdowns = resp.get_touchdowns(msg)
-
-        touchdown_counter += 1
-      end
-
-      FinTS::Client.logger.info('Fetching done.')
-      re_data = /^[^@]*@([0-9]+?)@(.+)/m
-      statement_response = ''
-      responses.each do |r|
-        seg = r.find_segment('HIKAZ')
-        next unless seg
-        match = re_data.match(seg)
-        next unless match
-        statement_response += match[2]
-      end
-      statement = Helper.mt940_to_array(statement_response)
-
-      FinTS::Client.logger.debug("Statement: #{statement}")
-      dialog.get_response_end
-      statement
-    end
-
-    def create_statement_message(dialog, account, start_date, end_date, touchdown)
-      hversion = dialog.hkkazversion
-
-      acc = if [4, 5, 6].include?(hversion)
-              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            elsif hversion == 7
-              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
-            else
-              raise ArgumentError, "Unsupported HKKAZ version #{hversion}"
-            end
-
-      segment = Segment::HKKAZ.new(3, hversion, acc, start_date, end_date, touchdown)
-      acc = FinTS::Helper.build_message(account, hversion)
-      new_message(dialog, [segment])
-    end
 
       # execute job
       msg = create_get_holdings_message(dialog, account)
       FinTS::Client.logger.debug("Sending HKWPD: #{msg}")
-      resp = dialog.send_msg(msg)
+      resp = dialog.get_response(msg)
       FinTS::Client.logger.debug("Got HIWPD response: #{resp}")
 
-      acc = FinTS::Helper.build_message(account, hversion)
+      # end dialog
+      dialog.get_response_end
 
       # find segment and split up to balance part
       seg = resp.find_segment('HIWPD')
@@ -161,6 +90,63 @@ module FinTS
         FinTS::Client.logger.warn('No HIWPD response segment found - maybe account has no holdings?')
         []
       end
+    end
+
+    def get_statement(account, start_date, end_date)
+      FinTS::Client.logger.info("Start fetching from #{start_date} to #{end_date}")
+      dialog = new_dialog
+
+      msg = create_statement_message(dialog, account, start_date, end_date, nil)
+      FinTS::Client.logger.debug("Send message: #{msg}")
+      resp = dialog.get_response(msg)
+      touchdowns = resp.get_touchdowns(msg)
+      responses = [resp]
+      touchdown_counter = 1
+
+      while touchdowns.include?(Segment::HKKAZ)
+        FinTS::Client.logger.info("Fetching more results (#{touchdown_counter})...")
+        msg = create_statement_message(dialog, account, start_date, end_date, touchdowns[Segment::HKKAZ])
+        FinTS::Client.logger.debug("Send message: #{msg}")
+        resp = dialog.get_response(msg)
+        responses << resp
+        touchdowns = resp.get_touchdowns(msg)
+        touchdown_counter += 1
+      end
+
+      FinTS::Client.logger.info('Fetching done.')
+      re_data = /^[^@]*@([0-9]+?)@(.+)/m
+      statement_response = ''
+      responses.each do |r|
+        seg = r.find_segment('HIKAZ')
+        next unless seg
+        match = re_data.match(seg)
+        next unless match
+        statement_response << match[2]
+      end
+      statement = FinTS::Helper.mt940_to_array(statement_response)
+
+      FinTS::Client.logger.debug("Statement: #{statement}")
+      dialog.get_response_end
+      statement
+    end
+
+    private
+
+    def create_balance_message(dialog, account)
+      hversion = dialog.hksalversion
+
+      acc = FinTS::Helper.build_message(account, hversion)
+
+      segment = Segment::HKSAL.new(3, hversion, acc)
+      new_message(dialog, [segment])
+    end
+
+    def create_statement_message(dialog, account, start_date, end_date, touchdown)
+      hversion = dialog.hkkazversion
+
+      acc = FinTS::Helper.build_message(account, hversion)
+
+      segment = Segment::HKKAZ.new(3, hversion, acc, start_date, end_date, touchdown)
       new_message(dialog, [segment])
     end
 
@@ -171,6 +157,7 @@ module FinTS
 
       new_message(dialog, [Segment::HKWPD.new(3, hversion, acc)])
     end
+
     def new_dialog
       d = Dialog.new(@blz, @username, @pin, @system_id, @connection)
       d.sync
