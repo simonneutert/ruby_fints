@@ -21,9 +21,9 @@ module FinTS
 
       msg_spa = new_message(dialog, [Segment::HKSPA.new(3, nil, nil, nil)])
       FinTS::Client.logger.debug("Sending HKSPA: #{msg_spa}")
-      resp = dialog.send_msg(msg_spa)
+      resp = dialog.get_response(msg_spa)
       FinTS::Client.logger.debug("Got HKSPA response: #{resp}")
-      dialog.send_end
+      dialog.get_response_end
 
       accounts = resp.find_segment('HISPA')
       raise SegmentNotFoundError, 'Could not find HISPA segment' if accounts.nil?
@@ -49,8 +49,8 @@ module FinTS
 
       msg = create_balance_message(dialog, account)
       FinTS::Client.logger.debug("Send message: #{msg}")
-      resp = dialog.send_msg(msg)
-      dialog.send_end
+      resp = dialog.get_response(msg)
+      dialog.get_response_end
 
       # find segment and split up to balance part
       seg = resp.find_segment('HISAL')
@@ -94,7 +94,7 @@ module FinTS
 
       msg = create_statement_message(dialog, account, start_date, end_date, nil)
       FinTS::Client.logger.debug("Send message: #{msg}")
-      resp = dialog.send_msg(msg)
+      resp = dialog.get_response(msg)
       touchdowns = resp.get_touchdowns(msg)
       responses = [resp]
       touchdown_counter = 1
@@ -104,7 +104,7 @@ module FinTS
         msg = create_statement_message(dialog, account, start_date, end_date, touchdowns[Segment::HKKAZ])
         FinTS::Client.logger.debug("Send message: #{msg}")
 
-        resp = dialog.send_msg(msg)
+        resp = dialog.get_response(msg)
         responses << resp
         touchdowns = resp.get_touchdowns(msg)
 
@@ -124,7 +124,7 @@ module FinTS
       statement = Helper.mt940_to_array(statement_response)
 
       FinTS::Client.logger.debug("Statement: #{statement}")
-      dialog.send_end
+      dialog.get_response_end
       statement
     end
 
