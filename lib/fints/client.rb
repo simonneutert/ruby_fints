@@ -164,6 +164,7 @@ module FinTS
         FinTS::Client.logger.warn('No HIWPD response segment found - maybe account has no holdings?')
         []
       end
+      new_message(dialog, [segment])
     end
 
     def create_get_holdings_message(dialog, account)
@@ -185,5 +186,10 @@ module FinTS
       d.init
       return d
     end
+
+    def new_message(dialog, segments)
+      Message.new(@blz, @username, @pin, dialog.system_id, dialog.dialog_id, dialog.msg_no, segments, dialog.tan_mechs)
+    end
+
   end
 end
