@@ -42,7 +42,7 @@ module FinTS
 
     def get_dialog_id
       seg = self.find_segment('HNHBK')
-      raise ArgumentError, 'Invalid response, no HNHBK segment' unless seg
+      raise(ArgumentError, 'Invalid response, no HNHBK segment') unless seg
       get_segment_index(4, seg)
     end
 
