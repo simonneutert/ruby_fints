@@ -5,15 +5,18 @@ module FinTS
     attr_accessor :encrypted_segments
 
     def initialize(blz, username, pin, dialog, encrypted_segments)
+      # user data
       @blz = blz
       @username = username
       @pin = pin
+      # dialog class
       @system_id = dialog.system_id
       @dialog_id = dialog.dialog_id
       @msg_no = dialog.msg_no
+      @tan_mechs = dialog.tan_mechs
+      # defaults
       @segments = []
       @encrypted_segments = []
-      @tan_mechs = dialog.tan_mechs
       # build functions
       set_profile_and_security
       encode_segments(encrypted_segments)
@@ -70,6 +73,6 @@ module FinTS
     def to_s
       build_header.to_s + @segments.map(&:to_s).join('')
     end
-    
+
   end
 end

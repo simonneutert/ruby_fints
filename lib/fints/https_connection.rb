@@ -1,6 +1,6 @@
 module FinTS
   class HTTPSConnection
-    
+
     def initialize(url)
       @url = URI(url)
     end
@@ -13,6 +13,7 @@ module FinTS
       response = Net::HTTP.start(@url.host, @url.port, use_ssl: @url.scheme == 'https') do |http|
         http.post(@url.path, data, {'Content-Type' => 'text/plain'})
       end
+
       code = response.code.to_i
       if code < 200 || code > 299
         raise ConnectionError, "Bad status code #{code}"
