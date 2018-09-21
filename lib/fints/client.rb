@@ -16,8 +16,6 @@ module FinTS
 
     def get_sepa_accounts
       dialog = new_dialog
-      dialog.sync
-      dialog.init
 
       msg_spa = new_message(dialog, [Segment::HKSPA.new(3, nil, nil, nil)])
       FinTS::Client.logger.debug("Sending HKSPA: #{msg_spa}")
@@ -44,8 +42,6 @@ module FinTS
       FinTS::Client.logger.info("Start fetching balance")
 
       dialog = new_dialog
-      dialog.sync
-      dialog.init
 
       msg = create_balance_message(dialog, account)
       FinTS::Client.logger.debug("Send message: #{msg}")
@@ -89,8 +85,6 @@ module FinTS
       FinTS::Client.logger.info("Start fetching from #{start_date} to #{end_date}")
 
       dialog = new_dialog
-      dialog.sync
-      dialog.init
 
       msg = create_statement_message(dialog, account, start_date, end_date, nil)
       FinTS::Client.logger.debug("Send message: #{msg}")
@@ -184,6 +178,12 @@ module FinTS
             end
 
       new_message(dialog, [Segment::HKWPD.new(3, hversion, acc)])
+    end
+    def new_dialog
+      d = Dialog.new(@blz, @username, @pin, @system_id, @connection)
+      d.sync
+      d.init
+      return d
     end
   end
 end
