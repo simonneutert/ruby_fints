@@ -23,7 +23,7 @@ module FinTS
       dialog.get_response_end
 
       accounts = resp.find_segment('HISPA')
-      raise SegmentNotFoundError, 'Could not find HISPA segment' if accounts.nil?
+      raise(SegmentNotFoundError, 'Could not find HISPA segment') if accounts.nil?
       accountlist = accounts.split('+').drop(1)
       @accounts = accountlist.map do |acc|
         arr = acc.split(':')

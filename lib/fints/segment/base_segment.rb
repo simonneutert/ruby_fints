@@ -16,16 +16,6 @@ class BaseSegment
     res
   end
 
-  protected
-
-  def type
-    raise NotImplementedError
-  end
-
-  def version
-    raise NotImplementedError
-  end
-
   def country_code
     280
   end

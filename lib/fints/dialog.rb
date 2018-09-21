@@ -1,6 +1,8 @@
 module FinTS
   class DialogError < StandardError; end
 
+  require 'ostruct'
+
   class Dialog
     attr_accessor :system_id
     attr_accessor :dialog_id
@@ -31,8 +33,7 @@ module FinTS
 
       msg_sync = Message.new(
         @blz, @username, @pin,
-        @system_id, @dialog_id, @msg_no,
-        [seg_identification, seg_prepare, seg_sync]
+        self, [seg_identification, seg_prepare, seg_sync]
       )
 
       FinTS::Client.logger.debug("Sending SYNC: #{msg_sync}")
@@ -60,9 +61,7 @@ module FinTS
       seg_prepare = Segment::HKVVB.new(4)
       msg_init = Message.new(
         @blz, @username, @pin,
-        @system_id, @dialog_id, @msg_no,
-        @tan_mechs,
-        [seg_identification, seg_prepare]
+        self, [seg_identification, seg_prepare]
       )
       FinTS::Client.logger.debug("Sending INIT: #{msg_init}")
       resp = get_response(msg_init)
@@ -89,8 +88,7 @@ module FinTS
       FinTS::Client.logger.info('Initialize END')
       msg_end = Message.new(
         @blz, @username, @pin,
-        @system_id, @dialog_id, @msg_no,
-        [Segment::HKEND.new(3, @dialog_id)]
+        self, [Segment::HKEND.new(3, @dialog_id)]
       )
       FinTS::Client.logger.debug("Sending END: #{msg_end}")
       resp = get_response(msg_end)
