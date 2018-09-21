@@ -29,8 +29,7 @@ module FinTS
       seg_prepare = Segment::HKVVB.new(4)
       seg_sync = Segment::HKSYN.new(5)
 
-      msg_sync = new_message([seg_identification, seg_prepare, seg_sync])
-
+      msg_sync = new_message(self, [seg_identification, seg_prepare, seg_sync])
       FinTS::Client.logger.debug("Sending SYNC: #{msg_sync}")
       resp = get_response(msg_sync)
       FinTS::Client.logger.debug("Got SYNC response: #{resp}")
@@ -55,7 +54,7 @@ module FinTS
       FinTS::Client.logger.info('Initialize Dialog')
       seg_identification = Segment::HKIDN.new(3, @blz, @username, @system_id)
       seg_prepare = Segment::HKVVB.new(4)
-      msg_init = new_message([seg_identification, seg_prepare])
+      msg_init = new_message(self, [seg_identification, seg_prepare], @tan_mechs)
 
       FinTS::Client.logger.debug("Sending INIT: #{msg_init}")
       resp = get_response(msg_init)
@@ -79,7 +78,7 @@ module FinTS
 
     def get_response_end
       FinTS::Client.logger.info('Initialize END')
-      msg_end = new_message([Segment::HKEND.new(3, @dialog_id)])
+      msg_end = new_message(self, [Segment::HKEND.new(3, @dialog_id)])
       FinTS::Client.logger.debug("Sending END: #{msg_end}")
       resp = get_response(msg_end)
       FinTS::Client.logger.debug("Got END response: #{resp}")
@@ -91,12 +90,14 @@ module FinTS
 
     private
 
-    def new_message(encrypted_segments = nil)
-      Message.new(
+    def new_message(d, encrypted_segments, tan_mechs = nil)
+      m = Message.new(
         @blz, @username, @pin, # user data
-        self, # dialog instance
-        encrypted_segments # segment data
+        d, # dialog instance
+        encrypted_segments, # segment data
+        tan_mechs
       )
+      m
     end
 
   end

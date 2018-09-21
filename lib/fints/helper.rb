@@ -23,15 +23,5 @@ module FinTS
       deg.split(/:(?<!\?:)/)
     end
 
-    def self.build_message(account, hversion)
-      if [4, 5, 6].include?(hversion)
-        "#{account[:accountnumber]}:#{account[:subaccount]}:280:#{account[:blz]}"
-      elsif hversion == 7
-        "#{account[:iban]}:#{account[:bic]}:#{account[:accountnumber]}:#{account[:subaccount]}:280:#{account[:blz]}"
-      else
-        raise ArgumentError, "Unsupported HKSAL version #{hversion}"
-      end
-    end
-
   end
 end

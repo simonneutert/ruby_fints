@@ -27,14 +27,13 @@ module FinTS
       accountlist = accounts.split('+').drop(1)
       @accounts = accountlist.map do |acc|
         arr = acc.split(':')
-        hsh = {
+        {
           iban: arr[1],
           bic: arr[2],
           accountnumber: arr[3],
           subaccount: arr[4],
           blz: arr[6]
         }
-        hsh
       end
       @accounts
     end
@@ -48,7 +47,7 @@ module FinTS
       dialog.get_response_end
       # find segment and split up to balance part
       seg = resp.find_segment('HISAL')
-      arr = Helper.split_for_data_elements(Helper.split_for_data_groups(seg)[4])
+      arr = FinTS::Helper.split_for_data_elements(FinTS::Helper.split_for_data_groups(seg)[4])
       # formats amount
       amount = arr[1].sub(',', '.').to_f
       amount *= -1 if arr[0] == 'D' # 'C' for credit, 'D' for debit
@@ -88,7 +87,6 @@ module FinTS
     def get_statement(account, start_date, end_date)
       FinTS::Client.logger.info("Start fetching from #{start_date} to #{end_date}")
       dialog = new_dialog
-
       msg = create_statement_message(dialog, account, start_date, end_date, nil)
       FinTS::Client.logger.debug("Send message: #{msg}")
       resp = dialog.get_response(msg)
@@ -100,6 +98,7 @@ module FinTS
         FinTS::Client.logger.info("Fetching more results (#{touchdown_counter})...")
         msg = create_statement_message(dialog, account, start_date, end_date, touchdowns[Segment::HKKAZ])
         FinTS::Client.logger.debug("Send message: #{msg}")
+
         resp = dialog.get_response(msg)
         responses << resp
         touchdowns = resp.get_touchdowns(msg)
@@ -127,21 +126,41 @@ module FinTS
 
     def create_balance_message(dialog, account)
       hversion = dialog.hksalversion
-      acc = FinTS::Helper.build_message(account, hversion)
+      acc = if [4, 5, 6].include?(hversion)
+              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            elsif hversion == 7
+              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            else
+              raise ArgumentError, "Unsupported HKSAL version #{hversion}"
+            end
       segment = Segment::HKSAL.new(3, hversion, acc)
       new_message(dialog, [segment])
     end
 
     def create_statement_message(dialog, account, start_date, end_date, touchdown)
       hversion = dialog.hkkazversion
-      acc = FinTS::Helper.build_message(account, hversion)
+
+      acc = if [4, 5, 6].include?(hversion)
+              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            elsif hversion == 7
+              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            else
+              raise ArgumentError, "Unsupported HKKAZ version #{hversion}"
+            end
+
       segment = Segment::HKKAZ.new(3, hversion, acc, start_date, end_date, touchdown)
       new_message(dialog, [segment])
     end
 
     def create_get_holdings_message(dialog, account)
       hversion = dialog.hksalversion
-      acc = FinTS::Helper.build_message(account, hversion)
+      acc = if [1, 2, 3, 4, 5, 6].include?(hversion)
+              [account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            elsif hversion == 7
+              [account[:iban], account[:bic], account[:accountnumber], account[:subaccount], '280', account[:blz]].join(':')
+            else
+              raise ArgumentError, "Unsupported HKSAL version #{hversion}"
+            end
       new_message(dialog, [Segment::HKWPD.new(3, hversion, acc)])
     end
 
@@ -153,7 +172,7 @@ module FinTS
     end
 
     def new_message(dialog, segments)
-      Message.new(@blz, @username, @pin, dialog, segments)
+      Message.new(@blz, @username, @pin, dialog, segments, dialog.tan_mechs)
     end
 
   end

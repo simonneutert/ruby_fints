@@ -4,7 +4,7 @@ module FinTS
     attr_accessor :dialog_id
     attr_accessor :encrypted_segments
 
-    def initialize(blz, username, pin, dialog, encrypted_segments)
+    def initialize(blz, username, pin, dialog, encrypted_segments, tan_mechs = nil)
       # user data
       @blz = blz
       @username = username
@@ -13,19 +13,18 @@ module FinTS
       @system_id = dialog.system_id
       @dialog_id = dialog.dialog_id
       @msg_no = dialog.msg_no
-      @tan_mechs = dialog.tan_mechs
       # defaults
       @segments = []
       @encrypted_segments = []
       # build functions
-      set_profile_and_security
+      set_profile_and_security(tan_mechs)
       encode_segments(encrypted_segments)
     end
 
-    def set_profile_and_security
-      if @tan_mechs && !@tan_mechs.include?('999')
+    def set_profile_and_security(tan_mechs)
+      if tan_mechs && !tan_mechs.include?('999')
         @profile_version = 2
-        @security_function = @tan_mechs[0]
+        @security_function = tan_mechs[0]
       else
         @profile_version = 1
         @security_function = '999'
