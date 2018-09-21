@@ -36,47 +36,41 @@ module FinTS
         }
         hsh
       end
+      @accounts
     end
 
     def get_balance(account)
       FinTS::Client.logger.info('Start fetching balance')
       dialog = new_dialog
-
       msg = create_balance_message(dialog, account)
       FinTS::Client.logger.debug("Send message: #{msg}")
       resp = dialog.get_response(msg)
       dialog.get_response_end
-
       # find segment and split up to balance part
       seg = resp.find_segment('HISAL')
       arr = Helper.split_for_data_elements(Helper.split_for_data_groups(seg)[4])
-
+      # formats amount
       amount = arr[1].sub(',', '.').to_f
-      # 'C' for credit, 'D' for debit
-      amount *= -1 if arr[0] == 'D'
-
+      amount *= -1 if arr[0] == 'D' # 'C' for credit, 'D' for debit
+      # creates balance statement
       balance = {
         amount: amount,
         currency: arr[2],
         date: Date.parse(arr[3])
       }
-
       FinTS::Client.logger.debug("Balance: #{balance}")
       balance
     end
 
     def get_holdings(account)
       dialog = new_dialog
-
       # execute job
       msg = create_get_holdings_message(dialog, account)
       FinTS::Client.logger.debug("Sending HKWPD: #{msg}")
       resp = dialog.get_response(msg)
       FinTS::Client.logger.debug("Got HIWPD response: #{resp}")
-
       # end dialog
       dialog.get_response_end
-
       # find segment and split up to balance part
       seg = resp.find_segment('HIWPD')
       if seg
@@ -122,8 +116,8 @@ module FinTS
         next unless match
         statement_response << match[2]
       end
-      statement = FinTS::Helper.mt940_to_array(statement_response)
 
+      statement = FinTS::Helper.mt940_to_array(statement_response)
       FinTS::Client.logger.debug("Statement: #{statement}")
       dialog.get_response_end
       statement
@@ -133,35 +127,26 @@ module FinTS
 
     def create_balance_message(dialog, account)
       hversion = dialog.hksalversion
-
       acc = FinTS::Helper.build_message(account, hversion)
-
       segment = Segment::HKSAL.new(3, hversion, acc)
       new_message(dialog, [segment])
     end
 
     def create_statement_message(dialog, account, start_date, end_date, touchdown)
       hversion = dialog.hkkazversion
-
       acc = FinTS::Helper.build_message(account, hversion)
-
       segment = Segment::HKKAZ.new(3, hversion, acc, start_date, end_date, touchdown)
       new_message(dialog, [segment])
     end
 
     def create_get_holdings_message(dialog, account)
       hversion = dialog.hksalversion
-
       acc = FinTS::Helper.build_message(account, hversion)
-
       new_message(dialog, [Segment::HKWPD.new(3, hversion, acc)])
     end
 
     def new_dialog
-      d = Dialog.new(@blz, @username, @pin, @system_id, @connection)
-      d.sync
-      d.init
-      return d
+      Dialog.new(@blz, @username, @pin, @system_id, @connection).sync.init
     end
 
     def new_message(dialog, segments)
