@@ -3,6 +3,8 @@ module FinTS
     # HNHBS (Nachrichtenabschluss)
     # Section B.5.3
     class HNHBS < BaseSegment
+      attr_reader :type
+      attr_reader :version
 
       def initialize(segno, msgno)
         @type = 'HNHBS'

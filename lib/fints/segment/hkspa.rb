@@ -3,6 +3,8 @@ module FinTS
     # HKSPA (SEPA-Kontoverbindung anfordern)
     # Section C.10.1.3
     class HKSPA < BaseSegment
+      attr_reader :type
+      attr_reader :version
 
       def initialize(segno, accno, subaccfeature, blz)
         @type = 'HKSPA'

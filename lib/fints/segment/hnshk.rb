@@ -7,6 +7,9 @@ module FinTS
       SECURITY_BOUNDARY = 1  # SHM
       SECURITY_SUPPLIER_ROLE = 1  # ISS
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segno, secref, blz, username, system_id, profile_version, security_function=SECURITY_FUNC)
         @type = 'HNSHK'
         @version = 4

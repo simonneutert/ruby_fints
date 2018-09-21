@@ -7,6 +7,9 @@ module FinTS
       SYNC_MODE_LAST_MSG_NUMBER = 1
       SYNC_MODE_SIGNATURE_ID = 2
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segment_no, mode: SYNC_MODE_NEW_CUSTOMER_ID)
         @type = 'HKSYN'
         @version = 3

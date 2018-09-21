@@ -4,6 +4,8 @@ module FinTS
     # Section B.5.4
     class HNVSD < BaseSegment
       attr_reader :encoded_data
+      attr_reader :type
+      attr_reader :version
 
       def initialize(segno, encoded_data)
         @type = 'HNVSD'

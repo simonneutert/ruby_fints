@@ -7,6 +7,9 @@ module FinTS
       LANG_EN = 2
       LANG_FR = 3
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segment_no, lang: LANG_DE)
         @type = 'HKVVB'
         @version = 3

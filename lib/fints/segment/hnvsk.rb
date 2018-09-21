@@ -6,6 +6,9 @@ module FinTS
       COMPRESSION_NONE = 0
       SECURITY_SUPPLIER_ROLE = 1  # ISS
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segno, blz, username, system_id, profile_version)
         @type = 'HNVSK'
         @version = 3

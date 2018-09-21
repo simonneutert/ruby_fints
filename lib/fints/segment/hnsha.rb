@@ -8,10 +8,13 @@ module FinTS
       SECURITY_SUPPLIER_ROLE = 1  # ISS
       PINTAN_VERSION = 1  # 1-step
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segno, secref, pin)
         @type = 'HNSHA'
         @version = 2
-        data = [secref, '', Helper.fints_escape(pin)]
+        data = [secref, '', FinTS::Helper.fints_escape(pin)]
         super(segno, data)
       end
 

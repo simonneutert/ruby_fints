@@ -3,6 +3,8 @@ module FinTS
     # HKEND (Dialogende)
     # Section C.4.1.2
     class HKEND < BaseSegment
+      attr_reader :type
+      attr_reader :version
 
       def initialize(segno, dialog_id)
         @type = 'HKEND'

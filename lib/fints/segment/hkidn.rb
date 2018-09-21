@@ -3,7 +3,9 @@ module FinTS
     # HKIDN (Identifikation)
     # Section C.3.1.2
     class HKIDN < BaseSegment
-      
+      attr_reader :type
+      attr_reader :version
+
       def initialize(segment_number, blz, username, system_id=0, customerid=1)
         @type = 'HKIDN'
         @version = 2

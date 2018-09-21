@@ -5,6 +5,9 @@ module FinTS
     class HNHBK < BaseSegment
       HEADER_LENGTH = 29
 
+      attr_reader :type
+      attr_reader :version
+
       def initialize(msglen, dialog_id, msg_no)
         @type = 'HNHBK'
         @version = 3
