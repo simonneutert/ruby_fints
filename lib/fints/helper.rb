@@ -1,5 +1,6 @@
 module FinTS
   class Helper
+
     def self.fints_escape(content)
       content.gsub('?', '??').gsub('+', '?+').gsub(':', '?:').gsub("'", "?'")
     end
@@ -24,24 +25,13 @@ module FinTS
 
     def self.build_message(account, hversion)
       if [4, 5, 6].include?(hversion)
-        [
-          account[:accountnumber],
-          account[:subaccount],
-          '280',
-          account[:blz]
-        ].join(':')
+        "#{account[:accountnumber]}:#{account[:subaccount]}:280:#{account[:blz]}"
       elsif hversion == 7
-        [
-          account[:iban],
-          account[:bic],
-          account[:accountnumber],
-          account[:subaccount],
-          '280',
-          account[:blz]
-        ].join(':')
+        "#{account[:iban]}:#{account[:bic]}:#{account[:accountnumber]}:#{account[:subaccount]}:280:#{account[:blz]}"
       else
         raise ArgumentError, "Unsupported HKSAL version #{hversion}"
       end
     end
+
   end
 end
