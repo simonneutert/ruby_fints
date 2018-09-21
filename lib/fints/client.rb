@@ -146,7 +146,10 @@ module FinTS
     end
 
     def new_dialog
-      Dialog.new(@blz, @username, @pin, @system_id, @connection).sync.init
+      d = Dialog.new(@blz, @username, @pin, @system_id, @connection)
+      d.sync
+      d.init
+      d
     end
 
     def new_message(dialog, segments)
