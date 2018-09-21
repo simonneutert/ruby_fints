@@ -58,7 +58,6 @@ module FinTS
       FinTS::Client.logger.info('Initialize Dialog')
       seg_identification = Segment::HKIDN.new(3, @blz, @username, @system_id)
       seg_prepare = Segment::HKVVB.new(4)
-
       msg_init = Message.new(
         @blz, @username, @pin,
         @system_id, @dialog_id, @msg_no,
@@ -68,29 +67,26 @@ module FinTS
       FinTS::Client.logger.debug("Sending INIT: #{msg_init}")
       resp = get_response(msg_init)
       FinTS::Client.logger.debug("Got INIT response: #{resp}")
-
       @dialog_id = resp.get_dialog_id
       FinTS::Client.logger.info("Received dialog ID: #{@dialog_id}")
-
-      @dialog_id
+      self
     end
 
     def get_response(msg)
       FinTS::Client.logger.info('Sending Message')
       msg.msg_no = @msg_no
       msg.dialog_id = @dialog_id
-
       resp = Response.new(@connection.send_msg(msg))
       if !resp.successful?
         raise DialogError, resp.get_summary_by_segment('HIRMG')
+      else
+        @msg_no += 1
+        resp
       end
-      @msg_no += 1
-      resp
     end
 
     def get_response_end
       FinTS::Client.logger.info('Initialize END')
-
       msg_end = Message.new(
         @blz, @username, @pin,
         @system_id, @dialog_id, @msg_no,
