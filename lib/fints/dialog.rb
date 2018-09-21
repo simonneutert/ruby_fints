@@ -70,8 +70,6 @@ module FinTS
 
     def get_response(msg)
       FinTS::Client.logger.info('Sending Message')
-      msg.msg_no = @msg_no
-      msg.dialog_id = @dialog_id
       resp = Response.new(@connection.send_msg(msg))
       if !resp.successful?
         raise DialogError, resp.get_summary_by_segment('HIRMG')
