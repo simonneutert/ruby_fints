@@ -16,7 +16,6 @@ module FinTS
 
     def get_sepa_accounts
       dialog = new_dialog
-
       msg_spa = new_message(dialog, [Segment::HKSPA.new(3, nil, nil, nil)])
       FinTS::Client.logger.debug("Sending HKSPA: #{msg_spa}")
       resp = dialog.get_response(msg_spa)
@@ -166,7 +165,7 @@ module FinTS
     end
 
     def new_message(dialog, segments)
-      Message.new(@blz, @username, @pin, dialog.system_id, dialog.dialog_id, dialog.msg_no, segments, dialog.tan_mechs)
+      Message.new(@blz, @username, @pin, dialog, segments)
     end
 
   end

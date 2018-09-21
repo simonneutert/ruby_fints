@@ -4,23 +4,28 @@ module FinTS
     attr_accessor :dialog_id
     attr_accessor :encrypted_segments
 
-    def initialize(blz, username, pin, system_id, dialog_id, msg_no, encrypted_segments, tan_mechs=nil)
+    def initialize(blz, username, pin, dialog, encrypted_segments)
       @blz = blz
       @username = username
       @pin = pin
-      @system_id = system_id
-      @dialog_id = dialog_id
-      @msg_no = msg_no
+      @system_id = dialog.system_id
+      @dialog_id = dialog.dialog_id
+      @msg_no = dialog.msg_no
       @segments = []
       @encrypted_segments = []
+      @tan_mechs = dialog.tan_mechs
 
       if tan_mechs && !tan_mechs.include?('999')
+      set_profile_and_security
+    def set_profile_and_security
+      if @tan_mechs && !@tan_mechs.include?('999')
         @profile_version = 2
-        @security_function = tan_mechs[0]
+        @security_function = @tan_mechs[0]
       else
         @profile_version = 1
         @security_function = '999'
       end
+    end
 
       sig_head = build_signature_head
       enc_head = build_encryption_head
